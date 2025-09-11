@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bride AR Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        
+        #ar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            pointer-events: all;
+        }
+        
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+        
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(255,255,255,0.3);
+            border-top: 6px solid #ff69b4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 30px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #start-btn {
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 8px 25px rgba(255, 105, 180, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        #start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 105, 180, 0.4);
+        }
+        
+        #bride-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 400px;
+            display: none;
+            pointer-events: all;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        #bride-container.visible {
+            display: block;
+            animation: brideEntrance 2s ease-out;
+        }
+        
+        @keyframes brideEntrance {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.3) rotateY(180deg);
+            }
+            50% {
+                opacity: 0.7;
+                transform: translate(-50%, -50%) scale(1.1) rotateY(90deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotateY(0deg);
+            }
+        }
+        
+        .bride-figure {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, 
+                rgba(255,255,255,0.1) 0%,
+                rgba(255,255,255,0.3) 30%,
+                rgba(255,255,255,0.6) 60%,
+                rgba(255,255,255,0.9) 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            box-shadow: 
+                0 0 50px rgba(255,255,255,0.5),
+                inset 0 0 50px rgba(255,255,255,0.2);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .bride-head {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ffdbac 0%, #f4c2a1 100%);
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .bride-hair {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            height: 40px;
+            background: #8b4513;
+            border-radius: 50% 50% 0 0;
+        }
+        
+        .bride-veil {
+            position: absolute;
+            top: -5px;
+            left: -20px;
+            right: -20px;
+            height: 80px;
+            background: linear-gradient(45deg, 
+                rgba(255,255,255,0.8) 0%,
+                rgba(255,255,255,0.4) 50%,
+                rgba(255,255,255,0.1) 100%);
+            border-radius: 50%;
+            animation: veilFlow 4s ease-in-out infinite;
+        }
+        
+        @keyframes veilFlow {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+        
+        .bride-arms {
+            position: absolute;
+            top: 35%;
+            width: 100%;
+            height: 30%;
+        }
+        
+        .arm {
+            position: absolute;
+            width: 20px;
+            height: 80px;
+            background: #ffdbac;
+            border-radius: 10px;
+        }
+        
+        .arm.left {
+            left: 20%;
+            transform: rotate(-20deg);
+            animation: leftArmWave 2s ease-in-out infinite;
+        }
+        
+        .arm.right {
+            right: 20%;
+            transform: rotate(20deg);
+            animation: rightArmWave 2s ease-in-out infinite reverse;
+        }
+        
+        @keyframes leftArmWave {
+            0%, 100% { transform: rotate(-20deg); }
+            50% { transform: rotate(-10deg); }
+        }
+        
+        @keyframes rightArmWave {
+            0%, 100% { transform: rotate(20deg); }
+            50% { transform: rotate(30deg); }
+        }
+        
+        #flower {
+            position: absolute;
+            right: 15%;
+            top: 40%;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #ff69b4 0%, #ff1493 70%, #c71585 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+            animation: flowerGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes flowerGlow {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+            }
+            50% { 
+                transform: scale(1.2);
+                box-shadow: 0 0 30px rgba(255, 105, 180, 0.9);
+            }
+        }
+        
+        #flower.flying {
+            animation: flowerFly 3s ease-out;
+            z-index: 100;
+        }
+        
+        @keyframes flowerFly {
+            0% {
+                transform: scale(1);
+                right: 15%;
+                top: 40%;
+            }
+            50% {
+                transform: scale(2);
+                right: 45%;
+                top: 20%;
+            }
+            100% {
+                transform: scale(3);
+                right: 50%;
+                top: -10%;
+                opacity: 0;
+            }
+        }
+        
+        #tap-instruction {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 105, 180, 0.9);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            display: none;
+            animation: pulse 2s infinite;
+            pointer-events: all;
+        }
+        
+        #tap-instruction.visible {
+            display: block;
+        }
+        
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+        
+        .message {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
+            animation: messageSlide 4s ease-in-out;
+            pointer-events: none;
+        }
+        
+        @keyframes messageSlide {
+            0% { 
+                opacity: 0; 
+                transform: translateX(-50%) translateY(-50px);
+            }
+            20%, 80% { 
+                opacity: 1; 
+                transform: translateX(-50%) translateY(0);
+            }
+            100% { 
+                opacity: 0; 
+                transform: translateX(-50%) translateY(50px);
+            }
+        }
+        
+        #surface-detector {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 3px dashed rgba(255, 105, 180, 0.8);
+            border-radius: 20px;
+            background: rgba(255, 105, 180, 0.1);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #ff69b4;
+            text-align: center;
+            cursor: pointer;
+            pointer-events: all;
+            animation: surfacePulse 2s infinite;
+        }
+        
+        #surface-detector.visible {
+            display: flex;
+        }
+        
+        @keyframes surfacePulse {
+            0% { 
+                transform: translate(-50%, -50%) scale(1);
+                border-color: rgba(255, 105, 180, 0.8);
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.1);
+                border-color: rgba(255, 105, 180, 1);
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(1);
+                border-color: rgba(255, 105, 180, 0.8);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- Loading Screen -->
+        <div id="loading">
+            <div class="loader"></div>
+            <h1>✨ Bride AR Experience ✨</h1>
+            <p>Experience magical AR without complex 3D!</p>
+            <button id="start-btn">Start Experience</button>
+        </div>
+        
+        <!-- Camera Video -->
+        <video id="video" autoplay muted playsinline></video>
+        
+        <!-- AR Overlay -->
+        <div id="ar-overlay">
+            <!-- Surface Detector -->
+            <div id="surface-detector">
+                TAP HERE<br>
+                TO SUMMON<br>
+                THE BRIDE
+            </div>
+            
+            <!-- Bride Container -->
+            <div id="bride-container">
+                <div class="bride-figure">
+                    <div class="bride-veil"></div>
+                    <div class="bride-head">
+                        <div class="bride-hair"></div>
+                    </div>
+                    <div class="bride-arms">
+                        <div class="arm left"></div>
+                        <div class="arm right"></div>
+                    </div>
+                    <div id="flower"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instructions -->
+        <div id="tap-instruction">
+            Tap the bride to receive her flower! 🌸
+        </div>
+    </div>
+
+    <script>
+        class SimpleBrideAR {
+            constructor() {
+                this.video = document.getElementById('video');
+                this.isActive = false;
+                this.brideVisible = false;
+                this.hasGivenFlower = false;
+                
+                this.bindEvents();
+            }
+            
+            bindEvents() {
+                document.getElementById('start-btn').addEventListener('click', () => {
+                    this.startCamera();
+                });
+                
+                document.getElementById('surface-detector').addEventListener('click', () => {
+                    this.summonBride();
+                });
+                
+                document.getElementById('bride-container').addEventListener('click', () => {
+                    this.giveFlower();
+                });
+                
+                window.addEventListener('resize', () => {
+                    this.handleResize();
+                });
+            }
+            
+            async startCamera() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            facingMode: 'environment',
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        } 
+                    });
+                    
+                    this.video.srcObject = stream;
+                    
+                    this.video.addEventListener('loadedmetadata', () => {
+                        document.getElementById('loading').classList.add('hidden');
+                        this.isActive = true;
+                        
+                        // Show surface detector after delay
+                        setTimeout(() => {
+                            document.getElementById('surface-detector').classList.add('visible');
+                            this.showMessage('📱 Point camera at any surface and tap the box!');
+                        }, 1500);
+                    });
+                    
+                } catch (error) {
+                    console.error('Camera error:', error);
+                    this.showMessage('❌ Camera access needed. Please allow and refresh.');
+                }
+            }
+            
+            summonBride() {
+                if (this.brideVisible) return;
+                
+                this.brideVisible = true;
+                document.getElementById('surface-detector').classList.remove('visible');
+                document.getElementById('bride-container').classList.add('visible');
+                document.getElementById('tap-instruction').classList.add('visible');
+                
+                this.showMessage('👰 The bride appears! She has something for you...');
+                
+                // Add some sparkle effects
+                this.createSparkles();
+            }
+            
+            giveFlower() {
+                if (!this.brideVisible || this.hasGivenFlower) return;
+                
+                this.hasGivenFlower = true;
+                const flower = document.getElementById('flower');
+                
+                // Start flower flying animation
+                flower.classList.add('flying');
+                
+                document.getElementById('tap-instruction').classList.remove('visible');
+                this.showMessage('💐 The bride offers you her magical bouquet! 💐');
+                
+                // Create more sparkles
+                this.createSparkles();
+                
+                // Reset after animation
+                setTimeout(() => {
+                    flower.classList.remove('flying');
+                    this.hasGivenFlower = false;
+                    document.getElementById('tap-instruction').classList.add('visible');
+                }, 3000);
+            }
+            
+            createSparkles() {
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(() => {
+                        const sparkle = document.createElement('div');
+                        sparkle.style.cssText = `
+                            position: fixed;
+                            width: 6px;
+                            height: 6px;
+                            background: #ff69b4;
+                            border-radius: 50%;
+                            pointer-events: none;
+                            z-index: 100;
+                            left: ${Math.random() * window.innerWidth}px;
+                            top: ${Math.random() * window.innerHeight}px;
+                            animation: sparkle 2s ease-out forwards;
+                        `;
+                        
+                        document.body.appendChild(sparkle);
+                        
+                        setTimeout(() => {
+                            if (sparkle.parentNode) {
+                                sparkle.parentNode.removeChild(sparkle);
+                            }
+                        }, 2000);
+                    }, i * 100);
+                }
+            }
+            
+            showMessage(text) {
+                const message = document.createElement('div');
+                message.className = 'message';
+                message.textContent = text;
+                document.body.appendChild(message);
+                
+                setTimeout(() => {
+                    if (message.parentNode) {
+                        message.parentNode.removeChild(message);
+                    }
+                }, 4000);
+            }
+            
+            handleResize() {
+                // Handle responsive design if needed
+            }
+        }
+        
+        // Add sparkle animation CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes sparkle {
+                0% { 
+                    opacity: 1; 
+                    transform: scale(0) rotate(0deg);
+                }
+                50% { 
+                    opacity: 1; 
+                    transform: scale(1) rotate(180deg);
+                }
+                100% { 
+                    opacity: 0; 
+                    transform: scale(0) rotate(360deg);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new SimpleBrideAR();
+        });
+    </script>
+</body>
+</html>
