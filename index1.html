@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bride AR Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+        }
+        
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            pointer-events: all;
+        }
+        
+        #loading.hidden {
+            display: none;
+        }
+        
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff69b4;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #start-btn {
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        #start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 105, 180, 0.4);
+        }
+        
+        #bride-viewer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            height: 70%;
+            max-height: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 105, 180, 0.6);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            box-shadow: 0 20px 40px rgba(255, 105, 180, 0.3);
+            cursor: pointer;
+        }
+        
+        #bride-viewer.visible {
+            display: flex;
+            animation: modelAppear 2s ease-out;
+        }
+        
+        @keyframes modelAppear {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.3) rotateY(180deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotateY(0deg);
+            }
+        }
+        
+        #bride-content {
+            width: 100%;
+            height: 100%;
+            border-radius: 18px;
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ff69b4;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #instructions {
+            position: fixed;
+            bottom: 30px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 14px;
+            pointer-events: all;
+        }
+        
+        #surface-detector {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 3px dashed rgba(255, 105, 180, 0.8);
+            border-radius: 20px;
+            background: rgba(255, 105, 180, 0.1);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #ff69b4;
+            text-align: center;
+            cursor: pointer;
+            pointer-events: all;
+            animation: surfacePulse 2s infinite;
+            z-index: 1000;
+        }
+        
+        #surface-detector.visible {
+            display: flex;
+        }
+        
+        @keyframes surfacePulse {
+            0% { 
+                transform: translate(-50%, -50%) scale(1);
+                border-color: rgba(255, 105, 180, 0.8);
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.1);
+                border-color: rgba(255, 105, 180, 1);
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(1);
+                border-color: rgba(255, 105, 180, 0.8);
+            }
+        }
+        
+        .message {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
+            animation: messageSlide 4s ease-in-out;
+            pointer-events: none;
+        }
+        
+        @keyframes messageSlide {
+            0% { opacity: 0; transform: translateX(-50%) translateY(-50px); }
+            20%, 80% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(50px); }
+        }
+        
+        #flower-animation {
+            position: fixed;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #ff69b4 0%, #ff1493 70%);
+            border-radius: 50%;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 0 30px rgba(255, 105, 180, 0.8);
+        }
+        
+        #flower-animation.flying {
+            display: block;
+            animation: flowerFly 3s ease-out;
+        }
+        
+        @keyframes flowerFly {
+            0% {
+                transform: scale(1);
+                top: 60%;
+                left: 45%;
+                opacity: 1;
+            }
+            50% {
+                transform: scale(2);
+                top: 40%;
+                left: 50%;
+            }
+            100% {
+                transform: scale(3);
+                top: 10%;
+                left: 50%;
+                opacity: 0;
+            }
+        }
+        
+        #debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-width: 200px;
+            z-index: 100;
+        }
+        
+        .model-button {
+            background: #ff69b4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+        
+        .model-button:hover {
+            background: #ff1493;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- Loading Screen -->
+        <div id="loading">
+            <div class="loader"></div>
+            <h1>✨ Your Bride AR Experience ✨</h1>
+            <p>Get ready to see your custom 3D bride!</p>
+            <div id="debug-info">Ready to start...</div>
+            <button id="start-btn">Start AR Experience</button>
+        </div>
+        
+        <!-- Camera Video -->
+        <video id="video" autoplay muted playsinline></video>
+        
+        <!-- Surface Detector -->
+        <div id="surface-detector">
+            TAP HERE<br>
+            TO SUMMON<br>
+            YOUR BRIDE
+        </div>
+        
+        <!-- Bride Viewer -->
+        <div id="bride-viewer">
+            <div id="bride-content">
+                <h2>👰 Your Custom Bride 👰</h2>
+                <p>3D Model Created by You!</p>
+                <button class="model-button" onclick="window.open('https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/Untitled-v2.glb', '_blank')">
+                    📥 Download Your 3D Model
+                </button>
+                <p style="font-size: 12px; margin: 10px 0; color: rgba(255,105,180,0.8);">
+                    Open the downloaded .glb file in any 3D viewer<br>
+                    (Blender, Windows 3D Viewer, etc.)
+                </p>
+                <p><strong><em>💐 Tap anywhere here for flower animation! 💐</em></strong></p>
+            </div>
+        </div>
+        
+        <!-- Instructions -->
+        <div id="instructions">
+            📱 Point camera at any surface and tap the pink box to see your bride!<br>
+            💐 Tap the bride area to receive her flower
+        </div>
+        
+        <!-- Flower Animation -->
+        <div id="flower-animation"></div>
+    </div>
+
+    <script>
+        class SimpleBrideAR {
+            constructor() {
+                this.video = document.getElementById('video');
+                this.isActive = false;
+                this.brideVisible = false;
+                this.debugInfo = document.getElementById('debug-info');
+                
+                this.updateDebug('Initializing...');
+                this.bindEvents();
+                this.updateDebug('Ready! Click Start AR Experience');
+            }
+            
+            updateDebug(message) {
+                this.debugInfo.textContent = message;
+                console.log('DEBUG:', message);
+            }
+            
+            bindEvents() {
+                document.getElementById('start-btn').addEventListener('click', () => {
+                    this.updateDebug('Start button clicked!');
+                    this.startCamera();
+                });
+                
+                document.getElementById('surface-detector').addEventListener('click', () => {
+                    this.updateDebug('Surface detector clicked!');
+                    this.summonBride();
+                });
+                
+                document.getElementById('bride-viewer').addEventListener('click', () => {
+                    this.updateDebug('Bride viewer clicked!');
+                    this.giveFlower();
+                });
+            }
+            
+            async startCamera() {
+                try {
+                    this.updateDebug('Requesting camera...');
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            facingMode: 'environment',
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 }
+                        } 
+                    });
+                    
+                    this.updateDebug('✅ Camera granted!');
+                    this.video.srcObject = stream;
+                    
+                    this.video.addEventListener('loadedmetadata', () => {
+                        this.updateDebug('✅ Video ready!');
+                        document.getElementById('loading').classList.add('hidden');
+                        this.isActive = true;
+                        
+                        setTimeout(() => {
+                            document.getElementById('surface-detector').classList.add('visible');
+                            this.showMessage('📱 Tap the pink box to summon your bride!');
+                            this.updateDebug('Surface detector now visible');
+                        }, 1000);
+                    });
+                    
+                } catch (error) {
+                    this.updateDebug('❌ Camera error: ' + error.message);
+                    this.showMessage('❌ Camera access needed. Please allow and refresh.');
+                }
+            }
+            
+            summonBride() {
+                if (this.brideVisible) return;
+                
+                this.brideVisible = true;
+                this.updateDebug('✅ Summoning 3D bride!');
+                
+                document.getElementById('surface-detector').classList.remove('visible');
+                document.getElementById('bride-viewer').classList.add('visible');
+                
+                // Check if model-viewer loaded
+                const modelViewer = document.getElementById('model-viewer');
+                modelViewer.addEventListener('load', () => {
+                    this.updateDebug('✅ 3D model loaded successfully!');
+                });
+                
+                modelViewer.addEventListener('error', () => {
+                    this.updateDebug('❌ 3D model failed to load');
+                });
+                
+                this.showMessage('👰 Your 3D bride appears! Tap her for the flower!');
+                this.createSparkles();
+            }
+            
+            giveFlower() {
+                if (!this.brideVisible) return;
+                
+                this.updateDebug('🌸 Giving flower!');
+                
+                const flower = document.getElementById('flower-animation');
+                flower.classList.add('flying');
+                
+                this.showMessage('💐 Your bride offers you her magical bouquet! 💐');
+                this.createSparkles();
+                
+                setTimeout(() => {
+                    flower.classList.remove('flying');
+                    this.updateDebug('Ready for next flower!');
+                }, 3000);
+            }
+            
+            createSparkles() {
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(() => {
+                        const sparkle = document.createElement('div');
+                        sparkle.style.cssText = `
+                            position: fixed;
+                            width: 8px;
+                            height: 8px;
+                            background: radial-gradient(circle, #ff69b4, #ff1493);
+                            border-radius: 50%;
+                            pointer-events: none;
+                            z-index: 100;
+                            left: ${Math.random() * window.innerWidth}px;
+                            top: ${Math.random() * window.innerHeight}px;
+                            animation: sparkle 2s ease-out forwards;
+                            box-shadow: 0 0 10px rgba(255, 105, 180, 0.8);
+                        `;
+                        
+                        document.body.appendChild(sparkle);
+                        
+                        setTimeout(() => {
+                            if (sparkle.parentNode) {
+                                sparkle.parentNode.removeChild(sparkle);
+                            }
+                        }, 2000);
+                    }, i * 100);
+                }
+            }
+            
+            showMessage(text) {
+                const message = document.createElement('div');
+                message.className = 'message';
+                message.textContent = text;
+                document.body.appendChild(message);
+                
+                setTimeout(() => {
+                    if (message.parentNode) {
+                        message.parentNode.removeChild(message);
+                    }
+                }, 4000);
+            }
+        }
+        
+        // Add sparkle animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes sparkle {
+                0% { opacity: 1; transform: scale(0) rotate(0deg); }
+                50% { opacity: 1; transform: scale(1.5) rotate(180deg); }
+                100% { opacity: 0; transform: scale(0) rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Start when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎉 Starting Simple Bride AR Experience');
+            new SimpleBrideAR();
+        });
+    </script>
+</body>
+</html>
