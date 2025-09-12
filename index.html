@@ -3,652 +3,394 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>✨ Bride AR - Three.js Direct Loading ✨</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/examples/js/controls/OrbitControls.js"></script>
+    <title>AR Experience - GLB Model</title>
     <style>
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            overflow: hidden;
-        }
-        
-        #welcome-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        #welcome-screen.hidden {
-            display: none;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-            background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #45b7d1);
-            background-size: 400% 400%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientShift 3s ease infinite;
-        }
-        
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        
-        .breakthrough-message {
-            background: linear-gradient(45deg, #4caf50, #8bc34a);
-            border: 3px solid #66bb6a;
-            border-radius: 20px;
-            padding: 25px;
-            margin: 20px 0;
-            font-size: 1.1rem;
-            animation: victoryPulse 2s infinite;
-            box-shadow: 0 15px 30px rgba(76, 175, 80, 0.4);
-        }
-        
-        @keyframes victoryPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-        
-        .start-button {
-            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
-            color: white;
-            border: none;
-            padding: 25px 50px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            margin: 30px 0;
-            transition: all 0.3s ease;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-        }
-        
-        .start-button:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4);
-        }
-        
-        #ar-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
             background: #000;
-            display: none;
-        }
-        
-        #ar-container.active {
-            display: block;
-        }
-        
-        #video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        #three-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            pointer-events: none;
-        }
-        
-        .ar-ui {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 3;
-            pointer-events: none;
-        }
-        
-        .surface-detector {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 220px;
-            height: 220px;
-            border: 4px dashed #ff6b6b;
-            border-radius: 25px;
-            background: rgba(255, 107, 107, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ff6b6b;
-            font-weight: bold;
-            font-size: 16px;
-            text-align: center;
-            animation: pulse 2s infinite;
-            pointer-events: all;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-        }
-        
-        @keyframes pulse {
-            0%, 100% { 
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 0.8;
-            }
-            50% { 
-                transform: translate(-50%, -50%) scale(1.1);
-                opacity: 1;
-            }
-        }
-        
-        .controls {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 20px;
-            pointer-events: all;
-        }
-        
-        .control-btn {
-            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-        }
-        
-        .control-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-        }
-        
-        .status-display {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            background: rgba(0, 0, 0, 0.85);
-            color: #4ecdc4;
-            padding: 15px 20px;
-            border-radius: 15px;
-            font-family: monospace;
-            font-size: 13px;
-            min-width: 250px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(78, 205, 196, 0.3);
-        }
-        
-        .instructions {
-            position: absolute;
-            bottom: 25px;
-            left: 25px;
-            right: 25px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            font-size: 15px;
-            line-height: 1.5;
-            backdrop-filter: blur(15px);
-            pointer-events: all;
-        }
-        
-        .success-popup {
-            position: fixed;
-            top: 25%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #ff6b6b, #ffd93d);
-            color: white;
-            padding: 25px 40px;
-            border-radius: 25px;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: center;
-            z-index: 4000;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            animation: messageSlide 4s ease-in-out forwards;
-            pointer-events: none;
-        }
-        
-        @keyframes messageSlide {
-            0% { 
-                opacity: 0; 
-                transform: translateX(-50%) translateY(-50px);
-            }
-            20%, 80% { 
-                opacity: 1; 
-                transform: translateX(-50%) translateY(0);
-            }
-            100% { 
-                opacity: 0; 
-                transform: translateX(-50%) translateY(50px);
-            }
-        }
-        
-        .loading-indicator {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 107, 107, 0.9);
-            color: white;
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            display: none;
-            z-index: 100;
-        }
-        
-        .loading-indicator.visible {
-            display: block;
-        }
-        
-        .progress-bar {
-            width: 200px;
-            height: 10px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 5px;
-            margin: 15px auto;
+            font-family: Arial, sans-serif;
             overflow: hidden;
         }
         
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(45deg, #ffd93d, #ff8e53);
-            border-radius: 5px;
-            width: 0%;
-            transition: width 0.3s ease;
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
         }
+        
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 100;
+            max-width: 350px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        #arButton {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 100;
+            display: none;
+        }
+        
+        #arButton:hover {
+            background: #0056b3;
+        }
+        
+        #arButton:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .success { color: #4CAF50; }
+        .error { color: #f44336; }
     </style>
 </head>
 <body>
-    <!-- Welcome Screen -->
-    <div id="welcome-screen">
-        <h1>🚀 THREE.JS DIRECT APPROACH 🚀</h1>
-        
-        <div class="breakthrough-message">
-            💥 BREAKTHROUGH ATTEMPT! 💥<br>
-            🔧 Bypassing model-viewer DataCloneError<br>
-            ⚡ Using Three.js direct GLB loading<br>
-            📁 File: Untitled-v4.glb<br>
-            🎯 This should FINALLY work!
+    <div id="container">
+        <div id="info">
+            <h3>AR FBX Model Viewer</h3>
+            <p id="status">Initializing...</p>
         </div>
         
-        <p style="font-size: 1.2rem; margin: 20px 0; line-height: 1.4;">
-            We're ditching model-viewer and going straight to<br>
-            <strong>Three.js direct loading</strong> to avoid the DataCloneError!<br>
-            Your bride model will load with pure JavaScript power! 💪
-        </p>
-        
-        <button class="start-button" onclick="startARExperience()">
-            🚀 Launch Three.js AR Experience!
-        </button>
-        
-        <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 15px;">
-            No more postMessage errors • Direct 3D rendering • Pure performance
-        </p>
-    </div>
-    
-    <!-- AR Container -->
-    <div id="ar-container">
-        <video id="video" autoplay muted playsinline></video>
-        <canvas id="three-canvas"></canvas>
-        
-        <div class="ar-ui">
-            <!-- Loading Indicator -->
-            <div class="loading-indicator" id="loading-indicator">
-                🌸 Loading Your Bride Model 🌸
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <div id="progress-text">0%</div>
-            </div>
-            
-            <!-- Surface Detector -->
-            <div class="surface-detector" id="surface-detector">
-                TAP HERE<br>
-                TO SUMMON<br>
-                YOUR BRIDE ✨
-            </div>
-            
-            <!-- Controls -->
-            <div class="controls">
-                <button class="control-btn" onclick="giveFlower()">🌸 Give Flower</button>
-                <button class="control-btn" onclick="resetModel()">🔄 Reset</button>
-                <button class="control-btn" onclick="goHome()">🏠 Home</button>
-            </div>
-            
-            <!-- Status Display -->
-            <div class="status-display" id="status">
-                🎬 Initializing Three.js direct loading...
-            </div>
-            
-            <!-- Instructions -->
-            <div class="instructions" id="instructions">
-                🎯 <strong>Point camera at any surface</strong><br>
-                ✨ <strong>Tap the target</strong> to load your bride with Three.js<br>
-                💐 <strong>Drag to rotate • Scroll to zoom</strong>
-            </div>
+        <div id="loading">
+            <div class="spinner"></div>
+            <p>Loading 3D model...</p>
         </div>
+        
+        <button id="arButton">Enter AR</button>
     </div>
 
+    <!-- Load Three.js and GLTFLoader from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    
     <script>
-        // Global Three.js variables
-        let scene, camera, renderer, controls;
-        let brideModel = null;
-        let mixer = null;
-        let arActive = false;
-        let brideVisible = false;
-        let videoStream = null;
+        let scene, camera, renderer, model;
+        let arButton = document.getElementById('arButton');
+        let loadingDiv = document.getElementById('loading');
+        let statusP = document.getElementById('status');
         
-        function updateStatus(message) {
-            document.getElementById('status').textContent = message;
-            console.log('🔄 STATUS:', message);
+        // Your GLB model URL
+        const modelURL = 'https://juneatkins24-bot.github.io/bride-ar-model/Untitled-v4.glb';
+        
+        function updateStatus(message, className = '') {
+            statusP.innerHTML = `<span class="${className}">${message}</span>`;
+            console.log(message);
         }
         
-        function showSuccessMessage(text) {
-            const popup = document.createElement('div');
-            popup.className = 'success-popup';
-            popup.textContent = text;
-            document.body.appendChild(popup);
+        function init() {
+            updateStatus('Setting up 3D scene...');
             
-            setTimeout(() => {
-                if (popup.parentNode) {
-                    popup.parentNode.removeChild(popup);
-                }
-            }, 4000);
-        }
-        
-        function initThreeJS() {
-            const canvas = document.getElementById('three-canvas');
-            
-            // Scene setup
+            // Create scene
             scene = new THREE.Scene();
+            
+            // Create camera
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({ 
-                canvas: canvas, 
-                alpha: true, 
-                antialias: true 
-            });
+            camera.position.set(0, 1.6, 3);
+            
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setClearColor(0x000000, 0);
             renderer.shadowMap.enabled = true;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.xr.enabled = true;
+            document.getElementById('container').appendChild(renderer.domElement);
             
-            // Lighting
+            // Add lighting
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
             
             const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(10, 10, 5);
+            directionalLight.position.set(5, 10, 5);
             directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
             scene.add(directionalLight);
             
-            // Controls
-            controls = new THREE.OrbitControls(camera, canvas);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-            controls.enableZoom = true;
-            controls.enablePan = false;
+            // Add ground plane for AR reference
+            const groundGeometry = new THREE.PlaneGeometry(20, 20);
+            const groundMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x999999, 
+                transparent: true, 
+                opacity: 0.3 
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.y = -1;
+            ground.receiveShadow = true;
+            scene.add(ground);
             
-            camera.position.set(0, 1, 3);
-            controls.target.set(0, 0, 0);
+            // Load the GLB model
+            loadGLBModel();
             
-            updateStatus('✅ Three.js initialized successfully!');
+            // Check for AR support
+            checkARSupport();
+            
+            // Start animation loop
+            animate();
         }
         
-        function loadBrideModel() {
-            updateStatus('🚀 Loading bride model with Three.js...');
-            document.getElementById('loading-indicator').classList.add('visible');
+        function loadGLBModel() {
+            updateStatus('Loading your GLB model...');
             
-            const loader = new THREE.GLTFLoader();
-            const modelUrl = 'https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/Untitled-v4.glb';
-            
-            loader.load(
-                modelUrl,
-                // Success callback
-                (gltf) => {
-                    updateStatus('✅ 🎉 BRIDE MODEL LOADED WITH THREE.JS! 🎉');
-                    console.log('🎊 SUCCESS! Bride model loaded:', gltf);
-                    
-                    brideModel = gltf.scene;
-                    
-                    // Scale and position
-                    brideModel.scale.set(1, 1, 1);
-                    brideModel.position.set(0, -1, 0);
-                    brideModel.rotation.y = 0;
-                    
-                    // Add to scene
-                    scene.add(brideModel);
-                    
-                    // Setup animations if available
-                    if (gltf.animations && gltf.animations.length > 0) {
-                        mixer = new THREE.AnimationMixer(brideModel);
-                        gltf.animations.forEach((clip) => {
-                            const action = mixer.clipAction(clip);
-                            action.play();
-                        });
-                        updateStatus('✅ Model + animations loaded with Three.js!');
-                    }
-                    
-                    document.getElementById('loading-indicator').classList.remove('visible');
-                    showSuccessMessage('🎊 BREAKTHROUGH! Your bride loaded with Three.js! No more errors!');
-                    
-                    // Enable controls
-                    canvas.style.pointerEvents = 'all';
-                },
-                // Progress callback
-                (progress) => {
-                    const percent = Math.round((progress.loaded / progress.total) * 100);
-                    updateStatus(`📥 Loading: ${percent}%`);
-                    document.getElementById('progress-fill').style.width = percent + '%';
-                    document.getElementById('progress-text').textContent = percent + '%';
-                    console.log('Loading progress:', percent + '%');
-                },
-                // Error callback
-                (error) => {
-                    updateStatus('❌ Three.js loading failed: ' + error.message);
-                    console.error('Three.js loading error:', error);
-                    document.getElementById('loading-indicator').classList.remove('visible');
-                    showSuccessMessage('❌ Three.js loading failed. Check console for details.');
-                }
-            );
-        }
-        
-        function animate() {
-            if (!arActive) return;
-            
-            requestAnimationFrame(animate);
-            
-            // Update controls
-            if (controls) {
-                controls.update();
-            }
-            
-            // Update animations
-            if (mixer) {
-                mixer.update(0.016);
-            }
-            
-            // Rotate bride slowly
-            if (brideModel && brideVisible) {
-                brideModel.rotation.y += 0.005;
-            }
-            
-            // Render
-            if (renderer) {
-                renderer.render(scene, camera);
-            }
-        }
-        
-        async function startARExperience() {
-            updateStatus('🚀 Starting Three.js AR experience...');
-            
-            try {
-                // Initialize Three.js
-                initThreeJS();
-                
-                // Start camera
-                updateStatus('📷 Requesting camera access...');
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' } 
-                });
-                
-                const video = document.getElementById('video');
-                video.srcObject = stream;
-                videoStream = stream;
-                
-                video.addEventListener('loadedmetadata', () => {
-                    updateStatus('📹 Camera ready! Initializing 3D scene...');
-                    
-                    document.getElementById('welcome-screen').classList.add('hidden');
-                    document.getElementById('ar-container').classList.add('active');
-                    
-                    arActive = true;
-                    animate();
-                    
-                    setTimeout(() => {
-                        updateStatus('🎯 Ready! Tap target to load bride with Three.js!');
-                        showSuccessMessage('🎯 Three.js scene ready! Tap the target!');
-                    }, 1000);
-                });
-                
-            } catch (error) {
-                updateStatus('❌ Setup error: ' + error.message);
-                console.error('Setup failed:', error);
-            }
-        }
-        
-        function summonBride() {
-            if (!arActive || brideVisible) return;
-            
-            updateStatus('✨ Summoning bride with Three.js!');
-            brideVisible = true;
-            
-            document.getElementById('surface-detector').style.display = 'none';
-            
-            // Load the model
-            loadBrideModel();
-            
-            document.getElementById('instructions').innerHTML = `
-                👰 <strong>Your bride is loading with Three.js!</strong><br>
-                🔄 <strong>Drag to rotate • Scroll to zoom</strong><br>
-                🌸 <strong>Click "Give Flower" for animation</strong>
-            `;
-        }
-        
-        function giveFlower() {
-            if (!brideModel) {
-                showSuccessMessage('⏳ Please wait for model to load!');
+            // Check if GLTFLoader is available
+            if (typeof THREE.GLTFLoader === 'undefined') {
+                updateStatus('❌ GLTFLoader not available', 'error');
+                createFallbackModel();
                 return;
             }
             
-            updateStatus('🌸 Flower animation with Three.js!');
+            const loader = new THREE.GLTFLoader();
             
-            // Simple rotation animation
-            const startRotation = brideModel.rotation.y;
-            const endRotation = startRotation + Math.PI * 2;
-            const duration = 2000;
-            const startTime = Date.now();
+            // First, let's test if the file is accessible
+            fetch(modelURL, { method: 'HEAD' })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`File not accessible: ${response.status}`);
+                    }
+                    updateStatus('✓ GLB file is accessible, loading...');
+                    
+                    // Now load with GLTFLoader
+                    loader.load(
+                        modelURL,
+                        // Success callback
+                        function(gltf) {
+                            model = gltf.scene;
+                            
+                            // Configure model
+                            model.traverse((child) => {
+                                if (child.isMesh) {
+                                    child.castShadow = true;
+                                    child.receiveShadow = true;
+                                }
+                            });
+                            
+                            // Auto-scale and center the model
+                            const box = new THREE.Box3().setFromObject(model);
+                            const size = box.getSize(new THREE.Vector3());
+                            const maxDimension = Math.max(size.x, size.y, size.z);
+                            const scale = 2 / maxDimension; // Scale to about 2 units max
+                            model.scale.setScalar(scale);
+                            
+                            // Center the model
+                            const center = box.getCenter(new THREE.Vector3());
+                            model.position.copy(center).multiplyScalar(-scale);
+                            model.position.y = 0; // Place on ground
+                            
+                            scene.add(model);
+                            
+                            loadingDiv.style.display = 'none';
+                            updateStatus('✓ GLB model loaded successfully!', 'success');
+                            
+                            // Add model info
+                            setTimeout(() => {
+                                const info = document.createElement('div');
+                                info.innerHTML = `
+                                    <hr>
+                                    <p><strong>Model Info:</strong></p>
+                                    <p>• Original size: ${size.x.toFixed(2)} × ${size.y.toFixed(2)} × ${size.z.toFixed(2)}</p>
+                                    <p>• Scale factor: ${scale.toFixed(2)}</p>
+                                    <p>• Meshes: ${countMeshes(model)}</p>
+                                    <p class="success">Ready for AR!</p>
+                                `;
+                                document.getElementById('info').appendChild(info);
+                            }, 1000);
+                        },
+                        // Progress callback
+                        function(progress) {
+                            if (progress.lengthComputable) {
+                                const percent = Math.round((progress.loaded / progress.total) * 100);
+                                updateStatus(`Loading GLB model... ${percent}%`);
+                            } else {
+                                updateStatus('Loading GLB model...');
+                            }
+                        },
+                        // Error callback
+                        function(error) {
+                            console.error('GLB loading error:', error);
+                            
+                            // Check if it's a compression error
+                            if (error.message && error.message.includes('meshopt')) {
+                                updateStatus('❌ Model uses unsupported compression', 'error');
+                                showCompressionHelp();
+                            } else {
+                                updateStatus('❌ Failed to load GLB model', 'error');
+                            }
+                            createFallbackModel();
+                        }
+                    );
+                })
+                .catch(error => {
+                    console.error('File access error:', error);
+                    updateStatus('❌ Cannot access GLB file', 'error');
+                    createFallbackModel();
+                });
+        }
+        
+        function countMeshes(object) {
+            let count = 0;
+            object.traverse((child) => {
+                if (child.isMesh) count++;
+            });
+            return count;
+        }
+        
+        function showCompressionHelp() {
+            const help = document.createElement('div');
+            help.innerHTML = `
+                <hr>
+                <p class="error"><strong>Compression Issue</strong></p>
+                <p>Your GLB file uses Meshopt compression which isn't supported in this simple viewer.</p>
+                <p><strong>Solutions:</strong></p>
+                <p>1. Re-export your model without compression</p>
+                <p>2. Use Draco compression instead</p>
+                <p>3. Use an uncompressed GLB format</p>
+                <p><strong>Test:</strong> <a href="${modelURL}" target="_blank">Download your GLB file</a></p>
+            `;
+            document.getElementById('info').appendChild(help);
+        }
+        
+        function createFallbackModel() {
+            updateStatus('Creating fallback model...', 'error');
             
-            const animateFlower = () => {
-                const elapsed = Date.now() - startTime;
-                const progress = Math.min(elapsed / duration, 1);
+            // Create a distinctive fallback
+            const geometry = new THREE.ConeGeometry(0.5, 1, 8);
+            const material = new THREE.MeshLambertMaterial({ color: 0xff6b6b });
+            model = new THREE.Mesh(geometry, material);
+            model.position.set(0, 0.5, 0);
+            model.castShadow = true;
+            scene.add(model);
+            
+            loadingDiv.style.display = 'none';
+            
+            const troubleshoot = document.createElement('div');
+            troubleshoot.innerHTML = `
+                <hr>
+                <p class="error"><strong>Using Fallback Model</strong></p>
+                <p>Your GLB file: <a href="${modelURL}" target="_blank">Test download</a></p>
+                <p><strong>Possible issues:</strong></p>
+                <p>• File uses unsupported compression (Meshopt)</p>
+                <p>• CORS headers missing</p>
+                <p>• File corruption</p>
+                <p>• GitHub Pages not properly configured</p>
+            `;
+            document.getElementById('info').appendChild(troubleshoot);
+        }
+        
+        function checkARSupport() {
+            if ('xr' in navigator) {
+                navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+                    if (supported) {
+                        arButton.style.display = 'block';
+                        arButton.addEventListener('click', startAR);
+                    } else {
+                        showARInstructions();
+                    }
+                });
+            } else {
+                showARInstructions();
+            }
+        }
+        
+        function showARInstructions() {
+            const arInfo = document.createElement('div');
+            arInfo.innerHTML = `
+                <hr>
+                <p><strong>AR Requirements:</strong></p>
+                <p>• Chrome/Edge on Android device</p>
+                <p>• ARCore supported device</p>
+                <p>• HTTPS connection</p>
+                <p>• Enable WebXR flags if needed</p>
+            `;
+            document.getElementById('info').appendChild(arInfo);
+        }
+        
+        function startAR() {
+            updateStatus('🥽 Starting AR session...', 'success');
+            arButton.disabled = true;
+            
+            navigator.xr.requestSession('immersive-ar', {
+                requiredFeatures: ['hit-test'],
+                optionalFeatures: ['dom-overlay', 'light-estimation']
+            }).then((session) => {
+                renderer.xr.setSession(session);
+                updateStatus('🎯 AR session active!', 'success');
                 
-                brideModel.rotation.y = startRotation + (endRotation - startRotation) * progress;
+                session.addEventListener('end', () => {
+                    arButton.disabled = false;
+                    updateStatus('AR session ended');
+                });
                 
-                if (progress < 1) {
-                    requestAnimationFrame(animateFlower);
+            }).catch((error) => {
+                console.error('AR session failed:', error);
+                updateStatus('❌ Failed to start AR', 'error');
+                arButton.disabled = false;
+            });
+        }
+        
+        function animate() {
+            renderer.setAnimationLoop(() => {
+                // Rotate model for preview
+                if (model && !renderer.xr.isPresenting) {
+                    model.rotation.y += 0.005;
                 }
-            };
-            
-            animateFlower();
-            showSuccessMessage('🌸 Your bride offers her flower with Three.js magic!');
+                renderer.render(scene, camera);
+            });
         }
         
-        function resetModel() {
-            if (brideModel) {
-                brideModel.rotation.set(0, 0, 0);
-                brideModel.position.set(0, -1, 0);
-                camera.position.set(0, 1, 3);
-                controls.target.set(0, 0, 0);
-                controls.update();
-                updateStatus('🔄 Model reset to default position');
-            }
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
         }
         
-        function goHome() {
-            arActive = false;
-            brideVisible = false;
-            
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-            }
-            
-            if (brideModel) {
-                scene.remove(brideModel);
-                brideModel = null;
-            }
-            
-            document.getElementById('ar-container').classList.remove('active');
-            document.getElementById('welcome-screen').classList.remove('hidden');
-            document.getElementById('surface-detector').style.display = 'flex';
-            document.getElementById('loading-indicator').classList.remove('visible');
-            
-            updateStatus('🏠 Returned to home screen');
-        }
+        window.addEventListener('resize', onWindowResize);
         
-        // Event listeners
-        document.getElementById('surface-detector').addEventListener('click', summonBride);
-        
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (camera && renderer) {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-        });
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🚀 Three.js Direct Loading Initialized!');
-            updateStatus('Ready to bypass DataCloneError with Three.js!');
-        });
+        // Initialize everything
+        init();
     </script>
 </body>
 </html>
