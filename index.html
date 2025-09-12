@@ -53,13 +53,20 @@
             50% { background-position: 100% 50%; }
         }
         
-        .success-message {
-            background: rgba(76, 175, 80, 0.2);
-            border: 2px solid #4caf50;
-            border-radius: 15px;
-            padding: 20px;
+        .victory-message {
+            background: linear-gradient(45deg, #4caf50, #8bc34a);
+            border: 3px solid #66bb6a;
+            border-radius: 20px;
+            padding: 25px;
             margin: 20px 0;
-            font-size: 1.1rem;
+            font-size: 1.2rem;
+            animation: victoryPulse 2s infinite;
+            box-shadow: 0 15px 30px rgba(76, 175, 80, 0.4);
+        }
+        
+        @keyframes victoryPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 15px 30px rgba(76, 175, 80, 0.4); }
+            50% { transform: scale(1.02); box-shadow: 0 20px 40px rgba(76, 175, 80, 0.6); }
         }
         
         .start-button {
@@ -67,7 +74,7 @@
             color: white;
             border: none;
             padding: 25px 50px;
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
@@ -115,34 +122,37 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 220px;
-            height: 220px;
+            width: 240px;
+            height: 240px;
             border: 4px dashed #ff6b6b;
-            border-radius: 25px;
-            background: rgba(255, 107, 107, 0.15);
+            border-radius: 30px;
+            background: linear-gradient(45deg, rgba(255, 107, 107, 0.2), rgba(255, 215, 61, 0.2));
             display: flex;
             align-items: center;
             justify-content: center;
             color: #ff6b6b;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 18px;
             text-align: center;
-            animation: surfacePulse 2s infinite;
+            animation: epicPulse 2s infinite;
             pointer-events: all;
             cursor: pointer;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 20px 40px rgba(255, 107, 107, 0.3);
         }
         
-        @keyframes surfacePulse {
+        @keyframes epicPulse {
             0%, 100% { 
                 transform: translate(-50%, -50%) scale(1);
                 border-color: #ff6b6b;
-                background: rgba(255, 107, 107, 0.15);
+                background: linear-gradient(45deg, rgba(255, 107, 107, 0.2), rgba(255, 215, 61, 0.2));
+                box-shadow: 0 20px 40px rgba(255, 107, 107, 0.3);
             }
             50% { 
-                transform: translate(-50%, -50%) scale(1.08);
+                transform: translate(-50%, -50%) scale(1.1);
                 border-color: #ff4757;
-                background: rgba(255, 107, 107, 0.25);
+                background: linear-gradient(45deg, rgba(255, 107, 107, 0.4), rgba(255, 215, 61, 0.4));
+                box-shadow: 0 30px 60px rgba(255, 107, 107, 0.5);
             }
         }
         
@@ -151,46 +161,72 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 85%;
-            max-width: 420px;
-            height: 75%;
-            max-height: 560px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(25px);
-            border: 3px solid rgba(255, 107, 107, 0.7);
-            border-radius: 30px;
+            width: 90%;
+            max-width: 450px;
+            height: 80%;
+            max-height: 600px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(30px);
+            border: 4px solid rgba(255, 107, 107, 0.8);
+            border-radius: 35px;
             display: none;
             pointer-events: all;
             cursor: pointer;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7);
             overflow: hidden;
+            position: relative;
         }
         
         .bride-container.visible {
             display: block;
-            animation: brideEntrance 2.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            animation: brideGrandEntrance 3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
         
-        @keyframes brideEntrance {
+        @keyframes brideGrandEntrance {
             0% {
                 opacity: 0;
-                transform: translate(-50%, -50%) scale(0.3) rotateY(180deg) rotateX(45deg);
+                transform: translate(-50%, -50%) scale(0.2) rotateY(270deg) rotateX(90deg);
+                filter: blur(20px);
             }
-            60% {
+            30% {
+                opacity: 0.3;
+                transform: translate(-50%, -50%) scale(0.6) rotateY(180deg) rotateX(45deg);
+                filter: blur(10px);
+            }
+            70% {
                 opacity: 0.8;
-                transform: translate(-50%, -50%) scale(1.05) rotateY(30deg) rotateX(15deg);
+                transform: translate(-50%, -50%) scale(1.1) rotateY(45deg) rotateX(15deg);
+                filter: blur(2px);
             }
             100% {
                 opacity: 1;
                 transform: translate(-50%, -50%) scale(1) rotateY(0deg) rotateX(0deg);
+                filter: blur(0px);
             }
         }
         
         model-viewer {
             width: 100%;
             height: 100%;
-            border-radius: 27px;
+            border-radius: 31px;
             background: transparent;
+        }
+        
+        .success-glow {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d, #6bcf7f, #45b7d1);
+            border-radius: 40px;
+            z-index: -1;
+            animation: successGlow 3s infinite;
+        }
+        
+        @keyframes successGlow {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
         }
         
         .controls {
@@ -207,33 +243,34 @@
             background: linear-gradient(45deg, #ff6b6b, #ff8e53);
             color: white;
             border: none;
-            padding: 15px 25px;
-            border-radius: 30px;
+            padding: 18px 30px;
+            border-radius: 35px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 15px;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
         }
         
         .control-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
         }
         
         .status-display {
             position: absolute;
             top: 25px;
             right: 25px;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             color: #4ecdc4;
-            padding: 15px 20px;
-            border-radius: 15px;
+            padding: 18px 25px;
+            border-radius: 20px;
             font-family: 'Courier New', monospace;
-            font-size: 13px;
-            min-width: 220px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(78, 205, 196, 0.3);
+            font-size: 14px;
+            min-width: 250px;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(78, 205, 196, 0.4);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
         
         .instructions {
@@ -241,107 +278,124 @@
             bottom: 25px;
             left: 25px;
             right: 25px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             color: white;
-            padding: 20px;
-            border-radius: 20px;
+            padding: 25px;
+            border-radius: 25px;
             text-align: center;
-            font-size: 15px;
-            line-height: 1.5;
-            backdrop-filter: blur(15px);
+            font-size: 16px;
+            line-height: 1.6;
+            backdrop-filter: blur(20px);
             pointer-events: all;
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
         
-        .flower-burst {
+        .flower-explosion {
             position: absolute;
-            width: 40px;
-            height: 40px;
-            background: radial-gradient(circle, #ff6b6b 0%, #ffd93d 50%, #ff8e53 100%);
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, #ff6b6b 0%, #ffd93d 30%, #ff8e53 60%, #6bcf7f 100%);
             border-radius: 50%;
             pointer-events: none;
-            z-index: 200;
-            box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+            z-index: 300;
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.9);
         }
         
-        .flower-burst.animate {
-            animation: flowerExplosion 3.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        .flower-explosion.animate {
+            animation: flowerMegaExplosion 4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
         
-        @keyframes flowerExplosion {
+        @keyframes flowerMegaExplosion {
             0% {
                 transform: scale(1);
                 opacity: 1;
             }
-            25% {
-                transform: scale(2.5);
+            20% {
+                transform: scale(3);
                 opacity: 0.9;
             }
-            50% {
-                transform: scale(4) translateY(-100px);
-                opacity: 0.7;
+            40% {
+                transform: scale(5) translateY(-80px);
+                opacity: 0.8;
+            }
+            60% {
+                transform: scale(7) translateY(-150px);
+                opacity: 0.6;
+            }
+            80% {
+                transform: scale(9) translateY(-250px);
+                opacity: 0.3;
             }
             100% {
-                transform: scale(6) translateY(-250px);
+                transform: scale(12) translateY(-400px);
                 opacity: 0;
             }
         }
         
-        .success-popup {
+        .victory-popup {
             position: fixed;
-            top: 25%;
+            top: 20%;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, #ff6b6b, #ffd93d);
             color: white;
-            padding: 25px 40px;
-            border-radius: 25px;
-            font-size: 18px;
+            padding: 30px 50px;
+            border-radius: 30px;
+            font-size: 20px;
             font-weight: bold;
             text-align: center;
-            z-index: 3000;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            animation: successSlide 4.5s ease-in-out forwards;
+            z-index: 4000;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: victorySlide 5s ease-in-out forwards;
             pointer-events: none;
+            border: 3px solid rgba(255, 255, 255, 0.3);
         }
         
-        @keyframes successSlide {
+        @keyframes victorySlide {
             0% { 
                 opacity: 0; 
-                transform: translateX(-50%) translateY(-60px) scale(0.8);
+                transform: translateX(-50%) translateY(-80px) scale(0.7);
+                filter: blur(10px);
             }
-            15%, 85% { 
+            20%, 80% { 
                 opacity: 1; 
                 transform: translateX(-50%) translateY(0) scale(1);
+                filter: blur(0px);
             }
             100% { 
                 opacity: 0; 
-                transform: translateX(-50%) translateY(60px) scale(0.8);
+                transform: translateX(-50%) translateY(80px) scale(0.7);
+                filter: blur(10px);
             }
         }
         
-        .sparkle {
+        .mega-sparkle {
             position: absolute;
-            width: 8px;
-            height: 8px;
+            width: 12px;
+            height: 12px;
             background: radial-gradient(circle, #ffd93d, #ff6b6b);
             border-radius: 50%;
             pointer-events: none;
-            z-index: 150;
-            box-shadow: 0 0 12px rgba(255, 215, 61, 0.8);
+            z-index: 200;
+            box-shadow: 0 0 20px rgba(255, 215, 61, 0.9);
         }
         
-        .sparkle.animate {
-            animation: sparkleFloat 2.5s ease-out forwards;
+        .mega-sparkle.animate {
+            animation: megaSparkleFloat 3s ease-out forwards;
         }
         
-        @keyframes sparkleFloat {
+        @keyframes megaSparkleFloat {
             0% { 
                 opacity: 1; 
                 transform: scale(0) rotate(0deg);
             }
-            50% { 
+            30% { 
                 opacity: 1; 
-                transform: scale(1.8) rotate(180deg);
+                transform: scale(2) rotate(120deg);
+            }
+            70% { 
+                opacity: 0.8; 
+                transform: scale(2.5) rotate(240deg);
             }
             100% { 
                 opacity: 0; 
@@ -353,26 +407,28 @@
 <body>
     <!-- Welcome Screen -->
     <div id="welcome-screen">
-        <h1>✨ Your Bride AR Experience ✨</h1>
+        <h1>🎉 VICTORY! Your Bride AR Experience! 🎉</h1>
         
-        <div class="success-message">
-            🎉 SUCCESS! Your Untitled.glb model is ready!<br>
-            📁 File: GLB format (web-optimized)<br>
-            📡 Hosted: Dropbox direct download<br>
-            📱 Compatible with all devices
+        <div class="victory-message">
+            ✨ BREAKTHROUGH ACHIEVED! ✨<br>
+            📁 File: Untitled-v4.glb (Compressed & Optimized!)<br>
+            📦 Size: Under 25MB - Perfect for web!<br>
+            🚀 Hosted: GitHub (Lightning fast CDN)<br>
+            💯 Status: Ready for AR magic!
         </div>
         
-        <p style="font-size: 1.2rem; margin: 20px 0; opacity: 0.9;">
-            Experience your custom 3D bride model in augmented reality!<br>
-            She'll appear in your real environment and offer you a magical flower.
+        <p style="font-size: 1.3rem; margin: 30px 0; opacity: 0.95; line-height: 1.4;">
+            After all our hard work compressing and optimizing,<br>
+            your beautiful bride model is finally ready for AR!<br>
+            <strong>Let's see her in action! 🎭✨</strong>
         </p>
         
         <button class="start-button" onclick="startARExperience()">
-            🚀 Start Your Bride AR Experience
+            🚀 Launch Your Bride AR Experience!
         </button>
         
-        <p style="font-size: 0.9rem; opacity: 0.7; margin-top: 20px;">
-            Allow camera access when prompted for the full AR experience
+        <p style="font-size: 1rem; opacity: 0.8; margin-top: 20px;">
+            🎯 Optimized for instant loading • 📱 Works on all devices
         </p>
     </div>
     
@@ -383,40 +439,44 @@
         <div class="ar-ui">
             <!-- Surface Detector -->
             <div class="surface-detector" id="surface-detector">
-                TAP HERE<br>
+                ✨ TAP HERE ✨<br>
                 TO SUMMON<br>
-                YOUR BRIDE ✨
+                YOUR BRIDE<br>
+                🎭 MAGIC AWAITS 🎭
             </div>
             
             <!-- Bride Model Container -->
             <div class="bride-container" id="bride-container">
+                <div class="success-glow"></div>
                 <model-viewer
                     id="bride-model"
-                    src="https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/FlowerAnimation%20(1).fbx"
-                    alt="Your Custom Bride 3D Model"
+                    src="https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/Untitled-v4.glb"
+                    alt="Your Custom Optimized Bride 3D Model"
                     auto-rotate
                     camera-controls
                     loading="eager"
-                    reveal="auto">
+                    reveal="auto"
+                    exposure="1"
+                    shadow-intensity="1">
                 </model-viewer>
             </div>
             
             <!-- Controls -->
             <div class="controls">
-                <button class="control-btn" onclick="giveFlower()">🌸 Receive Flower</button>
-                <button class="control-btn" onclick="goHome()">🏠 Home</button>
+                <button class="control-btn" onclick="giveFlower()">🌺 Magical Flower Ceremony</button>
+                <button class="control-btn" onclick="goHome()">🏠 Return Home</button>
             </div>
             
             <!-- Status Display -->
             <div class="status-display" id="status">
-                Initializing AR Experience...
+                🎬 Initializing your optimized AR experience...
             </div>
             
             <!-- Instructions -->
             <div class="instructions" id="instructions">
-                📱 Point your camera at any flat surface<br>
-                ✨ Tap the glowing target to summon your bride<br>
-                💐 Touch the bride model to receive her magical flower
+                🎯 <strong>Point your camera at any flat surface</strong><br>
+                ✨ <strong>Tap the glowing magical target</strong> to summon your bride<br>
+                💐 <strong>Touch the bride or use the flower button</strong> for the magical ceremony
             </div>
         </div>
     </div>
@@ -433,9 +493,9 @@
             console.log('🔄 STATUS:', message);
         }
         
-        function showSuccessMessage(text) {
+        function showVictoryMessage(text) {
             const popup = document.createElement('div');
-            popup.className = 'success-popup';
+            popup.className = 'victory-popup';
             popup.textContent = text;
             document.body.appendChild(popup);
             
@@ -443,16 +503,16 @@
                 if (popup.parentNode) {
                     popup.parentNode.removeChild(popup);
                 }
-            }, 4500);
+            }, 5000);
         }
         
         async function startARExperience() {
-            updateStatus('🚀 Starting AR Experience...');
+            updateStatus('🚀 Starting your optimized AR experience...');
             
             try {
                 updateStatus('📷 Requesting camera access...');
                 
-                // Request camera with multiple fallback options
+                // Enhanced camera constraints for better compatibility
                 const constraints = [
                     { video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } },
                     { video: { facingMode: 'environment' } },
@@ -474,14 +534,14 @@
                     throw new Error('All camera access attempts failed');
                 }
                 
-                updateStatus('✅ Camera access granted!');
+                updateStatus('✅ Camera access granted! Setting up video...');
                 
                 const video = document.getElementById('video');
                 video.srcObject = stream;
                 videoStream = stream;
                 
                 video.addEventListener('loadedmetadata', () => {
-                    updateStatus('📹 Video stream ready!');
+                    updateStatus('📹 Video stream ready! Loading your bride model...');
                     
                     // Hide welcome screen and show AR
                     document.getElementById('welcome-screen').classList.add('hidden');
@@ -491,9 +551,9 @@
                     
                     // Show surface detector after a moment
                     setTimeout(() => {
-                        updateStatus('🎯 Ready! Tap the target to summon your bride!');
-                        showSuccessMessage('📱 Point camera at any surface and tap the glowing target!');
-                    }, 1500);
+                        updateStatus('🎯 Ready! Tap the magical target to summon your bride!');
+                        showVictoryMessage('🎭 Your optimized bride model is ready! Tap the glowing target!');
+                    }, 2000);
                 });
                 
                 video.addEventListener('error', (e) => {
@@ -505,7 +565,7 @@
                 
             } catch (error) {
                 updateStatus('❌ Camera error: ' + error.message);
-                showSuccessMessage('❌ Camera access needed for AR experience. Please allow and try again.');
+                showVictoryMessage('❌ Camera access needed for AR experience. Please allow and try again.');
                 console.error('Camera setup failed:', error);
             }
         }
@@ -514,20 +574,29 @@
             const modelViewer = document.getElementById('bride-model');
             
             modelViewer.addEventListener('load', () => {
-                updateStatus('✅ Your bride model loaded perfectly!');
+                updateStatus('✅ 🎉 YOUR BRIDE MODEL LOADED SUCCESSFULLY! 🎉');
                 modelLoaded = true;
-                console.log('🎉 Bride model loaded successfully!');
+                console.log('🎊 VICTORY! Bride model loaded perfectly!');
+                showVictoryMessage('🎊 SUCCESS! Your optimized bride model has loaded perfectly!');
             });
             
             modelViewer.addEventListener('error', (event) => {
                 updateStatus('❌ Model loading error: ' + JSON.stringify(event.detail));
                 console.error('Model loading failed:', event);
+                showVictoryMessage('⚠️ Model loading issue. Check console for details.');
             });
             
             modelViewer.addEventListener('progress', (event) => {
                 if (event.detail.total > 0) {
                     const percent = Math.round((event.detail.loaded / event.detail.total) * 100);
-                    updateStatus(`📥 Loading your bride model: ${percent}%`);
+                    updateStatus(`📥 Loading your optimized bride model: ${percent}%`);
+                }
+            });
+            
+            // Additional event for when model becomes visible
+            modelViewer.addEventListener('model-visibility', (event) => {
+                if (event.detail.visible) {
+                    updateStatus('👁️ Your bride model is now visible and interactive!');
                 }
             });
         }
@@ -535,7 +604,7 @@
         function summonBride() {
             if (!arActive || brideVisible) return;
             
-            updateStatus('✨ Your bride is appearing!');
+            updateStatus('✨ Your bride is materializing in AR space!');
             brideVisible = true;
             
             // Hide surface detector and show bride
@@ -544,76 +613,57 @@
             
             // Update instructions
             document.getElementById('instructions').innerHTML = `
-                👰 Your custom bride has arrived!<br>
-                💐 Tap the "Receive Flower" button or touch the bride model<br>
-                🔄 Drag to rotate and explore your 3D creation
+                👰 <strong>Your custom bride has arrived in AR!</strong><br>
+                🌺 <strong>Tap "Magical Flower Ceremony"</strong> or touch the bride model<br>
+                🔄 <strong>Drag to rotate and zoom</strong> to explore your 3D creation
             `;
             
-            showSuccessMessage('👰 Your beautiful bride appears! Touch her to receive the magical flower!');
-            createSparkleShow();
+            showVictoryMessage('🎊 Your beautiful bride appears in AR! Touch her for the magical flower ceremony!');
+            createMegaSparkleShow();
         }
         
         function giveFlower() {
             if (!brideVisible) {
-                showSuccessMessage('⏳ Please summon your bride first!');
+                showVictoryMessage('⏳ Please summon your bride first by tapping the target!');
                 return;
             }
             
             if (!modelLoaded) {
-                showSuccessMessage('⏳ Model still loading, please wait...');
+                showVictoryMessage('⏳ Model still loading, please wait a moment...');
                 return;
             }
             
-            updateStatus('🌸 Your bride offers her magical flower!');
+            updateStatus('🌺 Your bride is presenting her magical flower ceremony!');
             
-            // Create flower burst effect
-            const flowerBurst = document.createElement('div');
-            flowerBurst.className = 'flower-burst animate';
-            flowerBurst.style.left = '50%';
-            flowerBurst.style.top = '60%';
-            flowerBurst.style.transform = 'translate(-50%, -50%)';
+            // Create mega flower explosion effect
+            const flowerExplosion = document.createElement('div');
+            flowerExplosion.className = 'flower-explosion animate';
+            flowerExplosion.style.left = '50%';
+            flowerExplosion.style.top = '60%';
+            flowerExplosion.style.transform = 'translate(-50%, -50%)';
             
-            document.querySelector('.ar-ui').appendChild(flowerBurst);
+            document.querySelector('.ar-ui').appendChild(flowerExplosion);
             
             setTimeout(() => {
-                if (flowerBurst.parentNode) {
-                    flowerBurst.parentNode.removeChild(flowerBurst);
+                if (flowerExplosion.parentNode) {
+                    flowerExplosion.parentNode.removeChild(flowerExplosion);
                 }
-            }, 3500);
+            }, 4000);
             
-            showSuccessMessage('💐 Your bride offers you her enchanted flower! A symbol of love and magic!');
-            createMassiveSparkleShow();
+            showVictoryMessage('💐✨ Your bride offers you her enchanted flower! A symbol of eternal love and AR magic! ✨💐');
+            createEpicSparkleFinale();
         }
         
-        function createSparkleShow() {
-            for (let i = 0; i < 15; i++) {
+        function createMegaSparkleShow() {
+            for (let i = 0; i < 20; i++) {
                 setTimeout(() => {
                     const sparkle = document.createElement('div');
-                    sparkle.className = 'sparkle animate';
+                    sparkle.className = 'mega-sparkle animate';
                     sparkle.style.left = (Math.random() * 100) + '%';
                     sparkle.style.top = (Math.random() * 100) + '%';
                     
-                    document.querySelector('.ar-ui').appendChild(sparkle);
-                    
-                    setTimeout(() => {
-                        if (sparkle.parentNode) {
-                            sparkle.parentNode.removeChild(sparkle);
-                        }
-                    }, 2500);
-                }, i * 150);
-            }
-        }
-        
-        function createMassiveSparkleShow() {
-            for (let i = 0; i < 25; i++) {
-                setTimeout(() => {
-                    const sparkle = document.createElement('div');
-                    sparkle.className = 'sparkle animate';
-                    sparkle.style.left = (Math.random() * 100) + '%';
-                    sparkle.style.top = (Math.random() * 100) + '%';
-                    
-                    // Random colors for extra magic
-                    const colors = ['#ff6b6b', '#ffd93d', '#ff8e53', '#6bcf7f', '#45b7d1'];
+                    // Random magical colors
+                    const colors = ['#ff6b6b', '#ffd93d', '#ff8e53', '#6bcf7f', '#45b7d1', '#da77f2'];
                     const color = colors[Math.floor(Math.random() * colors.length)];
                     sparkle.style.background = `radial-gradient(circle, ${color}, #ffffff)`;
                     
@@ -623,8 +673,39 @@
                         if (sparkle.parentNode) {
                             sparkle.parentNode.removeChild(sparkle);
                         }
-                    }, 2500);
+                    }, 3000);
                 }, i * 100);
+            }
+        }
+        
+        function createEpicSparkleFinale() {
+            for (let i = 0; i < 35; i++) {
+                setTimeout(() => {
+                    const sparkle = document.createElement('div');
+                    sparkle.className = 'mega-sparkle animate';
+                    sparkle.style.left = (Math.random() * 100) + '%';
+                    sparkle.style.top = (Math.random() * 100) + '%';
+                    
+                    // Epic finale colors - more magical!
+                    const epicColors = ['#ff6b6b', '#ffd93d', '#ff8e53', '#6bcf7f', '#45b7d1', '#da77f2', '#f093fb', '#f5576c'];
+                    const color = epicColors[Math.floor(Math.random() * epicColors.length)];
+                    sparkle.style.background = `radial-gradient(circle, ${color}, #ffffff)`;
+                    sparkle.style.boxShadow = `0 0 25px ${color}`;
+                    
+                    // Make some sparkles bigger for finale
+                    if (i % 3 === 0) {
+                        sparkle.style.width = '16px';
+                        sparkle.style.height = '16px';
+                    }
+                    
+                    document.querySelector('.ar-ui').appendChild(sparkle);
+                    
+                    setTimeout(() => {
+                        if (sparkle.parentNode) {
+                            sparkle.parentNode.removeChild(sparkle);
+                        }
+                    }, 3000);
+                }, i * 80);
             }
         }
         
@@ -650,7 +731,14 @@
             document.getElementById('surface-detector').style.display = 'flex';
             document.getElementById('bride-container').classList.remove('visible');
             
-            updateStatus('Welcome back!');
+            // Reset instructions
+            document.getElementById('instructions').innerHTML = `
+                🎯 <strong>Point your camera at any flat surface</strong><br>
+                ✨ <strong>Tap the glowing magical target</strong> to summon your bride<br>
+                💐 <strong>Touch the bride or use the flower button</strong> for the magical ceremony
+            `;
+            
+            updateStatus('🏠 Welcome back to the victory screen!');
         }
         
         // Event listeners
@@ -659,9 +747,10 @@
         
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🎉 Bride AR Experience Initialized!');
-            console.log('📁 Model: FlowerAnimation (1).fbx');
-            console.log('📍 Ready for AR magic!');
+            console.log('🎊 VICTORY! Bride AR Experience Initialized!');
+            console.log('📁 Model: Untitled-v4.glb (Optimized & Compressed)');
+            console.log('🚀 Status: Ready for AR magic!');
+            console.log('🎯 We did it! Your bride model is finally ready!');
         });
     </script>
 </body>
