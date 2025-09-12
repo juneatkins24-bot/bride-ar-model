@@ -311,13 +311,15 @@
         <!-- 3D Bride Viewer -->
         <div id="bride-3d-viewer">
             <model-viewer
-                src="https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/Untitled-v2.glb"
+                src="https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/Untitled-v2.glb?raw=true"
                 alt="Custom 3D Bride Model"
                 auto-rotate
                 camera-controls
                 interaction-prompt="none"
                 loading="eager"
-                reveal="auto">
+                reveal="auto"
+                environment-image="neutral"
+                shadow-intensity="1">
             </model-viewer>
         </div>
         
@@ -423,8 +425,50 @@
                 document.getElementById('bride-3d-viewer').classList.add('visible');
                 document.getElementById('tap-instruction').classList.add('visible');
                 
-                this.showMessage('👰 Your 3D bride appears! Touch to rotate, tap for flower!');
+                // Force model reload
+                const modelViewer = document.querySelector('model-viewer');
+                this.updateDebug('Attempting to load: Untitled-v2.glb');
+                
+                // Try to force reload the model
+                setTimeout(() => {
+                    if (modelViewer.src) {
+                        this.updateDebug('Model src set, checking load status...');
+                    } else {
+                        this.updateDebug('Model src not set, trying manual load...');
+                        modelViewer.src = 'https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/Untitled-v2.glb';
+                    }
+                }, 100);
+                
+                this.showMessage('👰 Your 3D bride is loading... Touch to rotate when ready!');
                 this.createSparkles();
+            }
+            
+            tryAlternativeModel() {
+                const modelViewer = document.querySelector('model-viewer');
+                const alternativeUrls = [
+                    'https://cdn.jsdelivr.net/gh/juneatkins24-bot/bride-ar-model@main/Untitled-v2.glb',
+                    'https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/Untitled-v2.glb?cache=false',
+                    'https://github.com/juneatkins24-bot/bride-ar-model/raw/main/Untitled-v2.glb'
+                ];
+                
+                let currentUrl = 0;
+                const tryNext = () => {
+                    if (currentUrl < alternativeUrls.length) {
+                        this.updateDebug(`Trying alternative URL ${currentUrl + 1}...`);
+                        modelViewer.src = alternativeUrls[currentUrl];
+                        currentUrl++;
+                        
+                        setTimeout(() => {
+                            if (modelViewer.loaded === false) {
+                                tryNext();
+                            }
+                        }, 3000);
+                    } else {
+                        this.updateDebug('❌ All URLs failed - check model file');
+                    }
+                };
+                
+                tryNext();
             }
             
             giveFlower() {
