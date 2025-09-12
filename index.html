@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bride AR Experience</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -86,71 +87,6 @@
             box-shadow: 0 10px 25px rgba(255, 105, 180, 0.4);
         }
         
-        #bride-viewer {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 400px;
-            height: 70%;
-            max-height: 500px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 105, 180, 0.6);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-            box-shadow: 0 20px 40px rgba(255, 105, 180, 0.3);
-            cursor: pointer;
-        }
-        
-        #bride-viewer.visible {
-            display: flex;
-            animation: modelAppear 2s ease-out;
-        }
-        
-        @keyframes modelAppear {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.3) rotateY(180deg);
-            }
-            100% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1) rotateY(0deg);
-            }
-        }
-        
-        #bride-content {
-            width: 100%;
-            height: 100%;
-            border-radius: 18px;
-            background: linear-gradient(45deg, #1a1a2e, #16213e);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #ff69b4;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        #instructions {
-            position: fixed;
-            bottom: 30px;
-            left: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px;
-            border-radius: 15px;
-            text-align: center;
-            font-size: 14px;
-            pointer-events: all;
-        }
-        
         #surface-detector {
             position: fixed;
             top: 50%;
@@ -190,6 +126,90 @@
                 transform: translate(-50%, -50%) scale(1);
                 border-color: rgba(255, 105, 180, 0.8);
             }
+        }
+        
+        #bride-3d-viewer {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 400px;
+            height: 70%;
+            max-height: 500px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 3px solid rgba(255, 105, 180, 0.8);
+            border-radius: 25px;
+            backdrop-filter: blur(15px);
+            display: none;
+            z-index: 100;
+            box-shadow: 0 25px 50px rgba(255, 105, 180, 0.4);
+            cursor: pointer;
+        }
+        
+        #bride-3d-viewer.visible {
+            display: block;
+            animation: modelAppear 2s ease-out;
+        }
+        
+        @keyframes modelAppear {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.3) rotateY(180deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotateY(0deg);
+            }
+        }
+        
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            border-radius: 22px;
+            background-color: transparent;
+        }
+        
+        model-viewer::part(default-progress-bar) {
+            display: none;
+        }
+        
+        #instructions {
+            position: fixed;
+            bottom: 30px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 14px;
+            pointer-events: all;
+        }
+        
+        #tap-instruction {
+            position: fixed;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 105, 180, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: none;
+            animation: pulse 2s infinite;
+            pointer-events: none;
+        }
+        
+        #tap-instruction.visible {
+            display: block;
+        }
+        
+        @keyframes pulse {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.05); }
+            100% { transform: translateX(-50%) scale(1); }
         }
         
         .message {
@@ -265,23 +285,6 @@
             max-width: 200px;
             z-index: 100;
         }
-        
-        .model-button {
-            background: #ff69b4;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            margin: 10px;
-            transition: all 0.3s;
-        }
-        
-        .model-button:hover {
-            background: #ff1493;
-            transform: scale(1.05);
-        }
     </style>
 </head>
 <body>
@@ -289,8 +292,8 @@
         <!-- Loading Screen -->
         <div id="loading">
             <div class="loader"></div>
-            <h1>✨ Your Bride AR Experience ✨</h1>
-            <p>Get ready to see your custom 3D bride!</p>
+            <h1>✨ Your 3D Bride AR Experience ✨</h1>
+            <p>Experience your custom 3D model in AR!</p>
             <div id="debug-info">Ready to start...</div>
             <button id="start-btn">Start AR Experience</button>
         </div>
@@ -301,30 +304,31 @@
         <!-- Surface Detector -->
         <div id="surface-detector">
             TAP HERE<br>
-            TO SUMMON<br>
-            YOUR BRIDE
+            TO SEE YOUR<br>
+            3D BRIDE
         </div>
         
-        <!-- Bride Viewer -->
-        <div id="bride-viewer">
-            <div id="bride-content">
-                <h2>👰 Your Custom Bride 👰</h2>
-                <p>3D Model Created by You!</p>
-                <button class="model-button" onclick="window.open('https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/Untitled-v2.glb', '_blank')">
-                    📥 Download Your 3D Model
-                </button>
-                <p style="font-size: 12px; margin: 10px 0; color: rgba(255,105,180,0.8);">
-                    Open the downloaded .glb file in any 3D viewer<br>
-                    (Blender, Windows 3D Viewer, etc.)
-                </p>
-                <p><strong><em>💐 Tap anywhere here for flower animation! 💐</em></strong></p>
-            </div>
+        <!-- 3D Bride Viewer -->
+        <div id="bride-3d-viewer">
+            <model-viewer
+                src="https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/Untitled-v2.glb"
+                alt="Custom 3D Bride Model"
+                auto-rotate
+                camera-controls
+                interaction-prompt="none"
+                loading="eager"
+                reveal="auto">
+            </model-viewer>
         </div>
         
         <!-- Instructions -->
         <div id="instructions">
-            📱 Point camera at any surface and tap the pink box to see your bride!<br>
-            💐 Tap the bride area to receive her flower
+            📱 Point camera at any surface and tap the pink box to see your 3D bride!<br>
+            💐 Tap the 3D model to receive her flower
+        </div>
+        
+        <div id="tap-instruction">
+            Tap your 3D bride to receive the flower! 🌸
         </div>
         
         <!-- Flower Animation -->
@@ -332,14 +336,14 @@
     </div>
 
     <script>
-        class SimpleBrideAR {
+        class BrideAR3D {
             constructor() {
                 this.video = document.getElementById('video');
                 this.isActive = false;
                 this.brideVisible = false;
                 this.debugInfo = document.getElementById('debug-info');
                 
-                this.updateDebug('Initializing...');
+                this.updateDebug('Initializing 3D AR...');
                 this.bindEvents();
                 this.updateDebug('Ready! Click Start AR Experience');
             }
@@ -357,12 +361,22 @@
                 
                 document.getElementById('surface-detector').addEventListener('click', () => {
                     this.updateDebug('Surface detector clicked!');
-                    this.summonBride();
+                    this.show3DBride();
                 });
                 
-                document.getElementById('bride-viewer').addEventListener('click', () => {
-                    this.updateDebug('Bride viewer clicked!');
+                document.getElementById('bride-3d-viewer').addEventListener('click', () => {
+                    this.updateDebug('3D bride clicked!');
                     this.giveFlower();
+                });
+                
+                // Listen for model loading events
+                const modelViewer = document.querySelector('model-viewer');
+                modelViewer.addEventListener('load', () => {
+                    this.updateDebug('✅ 3D model loaded successfully!');
+                });
+                
+                modelViewer.addEventListener('error', () => {
+                    this.updateDebug('❌ 3D model failed to load');
                 });
             }
             
@@ -388,7 +402,7 @@
                         
                         setTimeout(() => {
                             document.getElementById('surface-detector').classList.add('visible');
-                            this.showMessage('📱 Tap the pink box to summon your bride!');
+                            this.showMessage('📱 Tap the pink box to see your 3D bride!');
                             this.updateDebug('Surface detector now visible');
                         }, 1000);
                     });
@@ -399,26 +413,17 @@
                 }
             }
             
-            summonBride() {
+            show3DBride() {
                 if (this.brideVisible) return;
                 
                 this.brideVisible = true;
-                this.updateDebug('✅ Summoning 3D bride!');
+                this.updateDebug('✅ Showing 3D bride model!');
                 
                 document.getElementById('surface-detector').classList.remove('visible');
-                document.getElementById('bride-viewer').classList.add('visible');
+                document.getElementById('bride-3d-viewer').classList.add('visible');
+                document.getElementById('tap-instruction').classList.add('visible');
                 
-                // Check if model-viewer loaded
-                const modelViewer = document.getElementById('model-viewer');
-                modelViewer.addEventListener('load', () => {
-                    this.updateDebug('✅ 3D model loaded successfully!');
-                });
-                
-                modelViewer.addEventListener('error', () => {
-                    this.updateDebug('❌ 3D model failed to load');
-                });
-                
-                this.showMessage('👰 Your 3D bride appears! Tap her for the flower!');
+                this.showMessage('👰 Your 3D bride appears! Touch to rotate, tap for flower!');
                 this.createSparkles();
             }
             
@@ -430,17 +435,19 @@
                 const flower = document.getElementById('flower-animation');
                 flower.classList.add('flying');
                 
-                this.showMessage('💐 Your bride offers you her magical bouquet! 💐');
+                document.getElementById('tap-instruction').classList.remove('visible');
+                this.showMessage('💐 Your 3D bride offers you her magical bouquet! 💐');
                 this.createSparkles();
                 
                 setTimeout(() => {
                     flower.classList.remove('flying');
+                    document.getElementById('tap-instruction').classList.add('visible');
                     this.updateDebug('Ready for next flower!');
                 }, 3000);
             }
             
             createSparkles() {
-                for (let i = 0; i < 10; i++) {
+                for (let i = 0; i < 15; i++) {
                     setTimeout(() => {
                         const sparkle = document.createElement('div');
                         sparkle.style.cssText = `
@@ -495,8 +502,8 @@
         
         // Start when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🎉 Starting Simple Bride AR Experience');
-            new SimpleBrideAR();
+            console.log('🎉 Starting 3D Bride AR Experience');
+            new BrideAR3D();
         });
     </script>
 </body>
