@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bride AR Experience</title>
+    <title>3D Model Test - AR Experience</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <style>
         * {
@@ -82,11 +82,6 @@
             transition: all 0.3s;
         }
         
-        #start-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(255, 105, 180, 0.4);
-        }
-        
         #surface-detector {
             position: fixed;
             top: 50%;
@@ -128,7 +123,7 @@
             }
         }
         
-        #bride-3d-viewer {
+        #model-viewer-container {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -137,7 +132,7 @@
             max-width: 400px;
             height: 70%;
             max-height: 500px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(255, 105, 180, 0.2);
             border: 3px solid rgba(255, 105, 180, 0.8);
             border-radius: 25px;
             backdrop-filter: blur(15px);
@@ -147,7 +142,7 @@
             cursor: pointer;
         }
         
-        #bride-3d-viewer.visible {
+        #model-viewer-container.visible {
             display: block;
             animation: modelAppear 2s ease-out;
         }
@@ -155,11 +150,11 @@
         @keyframes modelAppear {
             0% {
                 opacity: 0;
-                transform: translate(-50%, -50%) scale(0.3) rotateY(180deg);
+                transform: translate(-50%, -50%) scale(0.3);
             }
             100% {
                 opacity: 1;
-                transform: translate(-50%, -50%) scale(1) rotateY(0deg);
+                transform: translate(-50%, -50%) scale(1);
             }
         }
         
@@ -170,8 +165,51 @@
             background-color: transparent;
         }
         
-        model-viewer::part(default-progress-bar) {
+        #debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            max-width: 250px;
+            z-index: 1000;
+            line-height: 1.4;
+        }
+        
+        #test-buttons {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
             display: none;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        #test-buttons.visible {
+            display: flex;
+        }
+        
+        .test-btn {
+            background: #ff69b4;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .test-btn:hover {
+            background: #ff1493;
+            transform: scale(1.05);
         }
         
         #instructions {
@@ -187,31 +225,6 @@
             pointer-events: all;
         }
         
-        #tap-instruction {
-            position: fixed;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 105, 180, 0.9);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 25px;
-            font-weight: bold;
-            display: none;
-            animation: pulse 2s infinite;
-            pointer-events: none;
-        }
-        
-        #tap-instruction.visible {
-            display: block;
-        }
-        
-        @keyframes pulse {
-            0% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.05); }
-            100% { transform: translateX(-50%) scale(1); }
-        }
-        
         .message {
             position: fixed;
             top: 20%;
@@ -225,7 +238,6 @@
             font-weight: bold;
             text-align: center;
             z-index: 1000;
-            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
             animation: messageSlide 4s ease-in-out;
             pointer-events: none;
         }
@@ -235,56 +247,6 @@
             20%, 80% { opacity: 1; transform: translateX(-50%) translateY(0); }
             100% { opacity: 0; transform: translateX(-50%) translateY(50px); }
         }
-        
-        #flower-animation {
-            position: fixed;
-            width: 50px;
-            height: 50px;
-            background: radial-gradient(circle, #ff69b4 0%, #ff1493 70%);
-            border-radius: 50%;
-            display: none;
-            z-index: 1000;
-            box-shadow: 0 0 30px rgba(255, 105, 180, 0.8);
-        }
-        
-        #flower-animation.flying {
-            display: block;
-            animation: flowerFly 3s ease-out;
-        }
-        
-        @keyframes flowerFly {
-            0% {
-                transform: scale(1);
-                top: 60%;
-                left: 45%;
-                opacity: 1;
-            }
-            50% {
-                transform: scale(2);
-                top: 40%;
-                left: 50%;
-            }
-            100% {
-                transform: scale(3);
-                top: 10%;
-                left: 50%;
-                opacity: 0;
-            }
-        }
-        
-        #debug-info {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: #00ff00;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 12px;
-            max-width: 200px;
-            z-index: 100;
-        }
     </style>
 </head>
 <body>
@@ -292,10 +254,10 @@
         <!-- Loading Screen -->
         <div id="loading">
             <div class="loader"></div>
-            <h1>✨ Your 3D Bride AR Experience ✨</h1>
-            <p>Experience your custom 3D model in AR!</p>
-            <div id="debug-info">Ready to start...</div>
-            <button id="start-btn">Start AR Experience</button>
+            <h1>🧪 3D Model Test Lab 🧪</h1>
+            <p>Testing different 3D models to isolate the problem!</p>
+            <div id="debug-info">Ready to start testing...</div>
+            <button id="start-btn">Start AR Test</button>
         </div>
         
         <!-- Camera Video -->
@@ -304,108 +266,95 @@
         <!-- Surface Detector -->
         <div id="surface-detector">
             TAP HERE<br>
-            TO SEE YOUR<br>
-            3D BRIDE
+            TO TEST<br>
+            3D MODELS
         </div>
         
-        <!-- 3D Bride Viewer -->
-        <div id="bride-3d-viewer">
+        <!-- Model Viewer Container -->
+        <div id="model-viewer-container">
             <model-viewer
-                src="https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/Untitled-v2.glb?raw=true"
-                alt="Custom 3D Bride Model"
+                id="test-model"
+                alt="Test 3D Model"
                 auto-rotate
                 camera-controls
-                interaction-prompt="none"
                 loading="eager"
-                reveal="auto"
-                environment-image="neutral"
-                shadow-intensity="1">
+                reveal="auto">
             </model-viewer>
+        </div>
+        
+        <!-- Test Buttons -->
+        <div id="test-buttons">
+            <button class="test-btn" onclick="testModel('https://modelviewer.dev/shared-assets/models/Astronaut.glb', 'Astronaut')">
+                🚀 Test Astronaut (Known Working)
+            </button>
+            <button class="test-btn" onclick="testModel('https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/Untitled.glb', 'Your Bride')">
+                👰 Test Your Bride Model
+            </button>
+            <button class="test-btn" onclick="testModel('https://modelviewer.dev/shared-assets/models/NeilArmstrong.glb', 'Neil Armstrong')">
+                👨‍🚀 Test Neil Armstrong
+            </button>
         </div>
         
         <!-- Instructions -->
         <div id="instructions">
-            📱 Point camera at any surface and tap the pink box to see your 3D bride!<br>
-            💐 Tap the 3D model to receive her flower
+            🧪 Testing 3D model loading to isolate the problem!<br>
+            📱 Tap the pink box, then try different test models
         </div>
-        
-        <div id="tap-instruction">
-            Tap your 3D bride to receive the flower! 🌸
-        </div>
-        
-        <!-- Flower Animation -->
-        <div id="flower-animation"></div>
     </div>
 
     <script>
-        class BrideAR3D {
+        class ModelTester {
             constructor() {
                 this.video = document.getElementById('video');
                 this.isActive = false;
-                this.brideVisible = false;
+                this.testVisible = false;
                 this.debugInfo = document.getElementById('debug-info');
                 
-                this.updateDebug('Initializing 3D AR...');
+                this.updateDebug('Model Tester initialized');
                 this.bindEvents();
-                this.updateDebug('Ready! Click Start AR Experience');
             }
             
             updateDebug(message) {
-                this.debugInfo.textContent = message;
+                const timestamp = new Date().toLocaleTimeString();
+                this.debugInfo.innerHTML = `[${timestamp}]<br>${message}`;
                 console.log('DEBUG:', message);
             }
             
             bindEvents() {
                 document.getElementById('start-btn').addEventListener('click', () => {
-                    this.updateDebug('Start button clicked!');
                     this.startCamera();
                 });
                 
                 document.getElementById('surface-detector').addEventListener('click', () => {
-                    this.updateDebug('Surface detector clicked!');
-                    this.show3DBride();
+                    this.showTestArea();
                 });
                 
-                document.getElementById('bride-3d-viewer').addEventListener('click', () => {
-                    this.updateDebug('3D bride clicked!');
-                    this.giveFlower();
-                });
-                
-                // Listen for model loading events
-                const modelViewer = document.querySelector('model-viewer');
-                modelViewer.addEventListener('load', () => {
-                    this.updateDebug('✅ 3D model loaded successfully!');
-                });
-                
-                modelViewer.addEventListener('error', () => {
-                    this.updateDebug('❌ 3D model failed to load');
-                });
+                // Global function for test buttons
+                window.testModel = (url, name) => {
+                    this.testSpecificModel(url, name);
+                };
             }
             
             async startCamera() {
                 try {
-                    this.updateDebug('Requesting camera...');
+                    this.updateDebug('Requesting camera access...');
                     
                     const stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { 
-                            facingMode: 'environment',
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 }
-                        } 
+                        video: { facingMode: 'environment' } 
                     });
                     
-                    this.updateDebug('✅ Camera granted!');
+                    this.updateDebug('✅ Camera access granted!');
                     this.video.srcObject = stream;
                     
                     this.video.addEventListener('loadedmetadata', () => {
-                        this.updateDebug('✅ Video ready!');
+                        this.updateDebug('✅ Video stream ready!');
                         document.getElementById('loading').classList.add('hidden');
                         this.isActive = true;
                         
                         setTimeout(() => {
                             document.getElementById('surface-detector').classList.add('visible');
-                            this.showMessage('📱 Tap the pink box to see your 3D bride!');
-                            this.updateDebug('Surface detector now visible');
+                            this.showMessage('🧪 Ready to test 3D models!');
+                            this.updateDebug('Surface detector active - tap to test!');
                         }, 1000);
                     });
                     
@@ -415,108 +364,71 @@
                 }
             }
             
-            show3DBride() {
-                if (this.brideVisible) return;
+            showTestArea() {
+                if (this.testVisible) return;
                 
-                this.brideVisible = true;
-                this.updateDebug('✅ Showing 3D bride model!');
+                this.testVisible = true;
+                this.updateDebug('✅ Opening test area...');
                 
                 document.getElementById('surface-detector').classList.remove('visible');
-                document.getElementById('bride-3d-viewer').classList.add('visible');
-                document.getElementById('tap-instruction').classList.add('visible');
+                document.getElementById('model-viewer-container').classList.add('visible');
+                document.getElementById('test-buttons').classList.add('visible');
                 
-                // Force model reload
-                const modelViewer = document.querySelector('model-viewer');
-                this.updateDebug('Attempting to load: Untitled-v2.glb');
+                this.showMessage('🧪 Choose a model to test!');
                 
-                // Try to force reload the model
-                setTimeout(() => {
-                    if (modelViewer.src) {
-                        this.updateDebug('Model src set, checking load status...');
-                    } else {
-                        this.updateDebug('Model src not set, trying manual load...');
-                        modelViewer.src = 'https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/Untitled-v2.glb';
+                // Set up model viewer event listeners
+                this.setupModelViewerListeners();
+            }
+            
+            setupModelViewerListeners() {
+                const modelViewer = document.getElementById('test-model');
+                
+                modelViewer.addEventListener('load', () => {
+                    this.updateDebug('✅ MODEL LOADED SUCCESSFULLY! 🎉');
+                });
+                
+                modelViewer.addEventListener('error', (event) => {
+                    this.updateDebug('❌ Model failed to load: ' + JSON.stringify(event.detail));
+                });
+                
+                modelViewer.addEventListener('progress', (event) => {
+                    if (event.detail.total > 0) {
+                        const progress = Math.round((event.detail.loaded / event.detail.total) * 100);
+                        this.updateDebug(`📥 Loading: ${progress}%`);
                     }
-                }, 100);
+                });
                 
-                this.showMessage('👰 Your 3D bride is loading... Touch to rotate when ready!');
-                this.createSparkles();
+                modelViewer.addEventListener('model-visibility', (event) => {
+                    this.updateDebug(`👁️ Model visibility: ${event.detail.visible}`);
+                });
             }
             
-            tryAlternativeModel() {
-                const modelViewer = document.querySelector('model-viewer');
-                const alternativeUrls = [
-                    'https://cdn.jsdelivr.net/gh/juneatkins24-bot/bride-ar-model@main/Untitled.glb',
-                    'https://raw.githubusercontent.com/juneatkins24-bot/bride-ar-model/main/Untitled.glb?cache=false',
-                    'https://github.com/juneatkins24-bot/bride-ar-model/raw/main/Untitled.glb'
-                ];
+            async testSpecificModel(url, name) {
+                this.updateDebug(`🧪 Testing: ${name}`);
+                this.updateDebug(`📡 URL: ${url.substring(0, 50)}...`);
                 
-                let currentUrl = 0;
-                const tryNext = () => {
-                    if (currentUrl < alternativeUrls.length) {
-                        this.updateDebug(`Trying alternative URL ${currentUrl + 1}...`);
-                        modelViewer.src = alternativeUrls[currentUrl];
-                        currentUrl++;
-                        
-                        setTimeout(() => {
-                            if (modelViewer.loaded === false) {
-                                tryNext();
-                            }
-                        }, 3000);
+                const modelViewer = document.getElementById('test-model');
+                
+                // Test URL accessibility first
+                try {
+                    this.updateDebug('🔍 Checking URL accessibility...');
+                    const response = await fetch(url, { method: 'HEAD' });
+                    if (response.ok) {
+                        this.updateDebug(`✅ URL accessible (${response.status})`);
+                        const contentType = response.headers.get('content-type');
+                        this.updateDebug(`📄 Content-Type: ${contentType || 'unknown'}`);
                     } else {
-                        this.updateDebug('❌ All URLs failed - check model file');
+                        this.updateDebug(`❌ URL failed: ${response.status} ${response.statusText}`);
                     }
-                };
-                
-                tryNext();
-            }
-            
-            giveFlower() {
-                if (!this.brideVisible) return;
-                
-                this.updateDebug('🌸 Giving flower!');
-                
-                const flower = document.getElementById('flower-animation');
-                flower.classList.add('flying');
-                
-                document.getElementById('tap-instruction').classList.remove('visible');
-                this.showMessage('💐 Your 3D bride offers you her magical bouquet! 💐');
-                this.createSparkles();
-                
-                setTimeout(() => {
-                    flower.classList.remove('flying');
-                    document.getElementById('tap-instruction').classList.add('visible');
-                    this.updateDebug('Ready for next flower!');
-                }, 3000);
-            }
-            
-            createSparkles() {
-                for (let i = 0; i < 15; i++) {
-                    setTimeout(() => {
-                        const sparkle = document.createElement('div');
-                        sparkle.style.cssText = `
-                            position: fixed;
-                            width: 8px;
-                            height: 8px;
-                            background: radial-gradient(circle, #ff69b4, #ff1493);
-                            border-radius: 50%;
-                            pointer-events: none;
-                            z-index: 100;
-                            left: ${Math.random() * window.innerWidth}px;
-                            top: ${Math.random() * window.innerHeight}px;
-                            animation: sparkle 2s ease-out forwards;
-                            box-shadow: 0 0 10px rgba(255, 105, 180, 0.8);
-                        `;
-                        
-                        document.body.appendChild(sparkle);
-                        
-                        setTimeout(() => {
-                            if (sparkle.parentNode) {
-                                sparkle.parentNode.removeChild(sparkle);
-                            }
-                        }, 2000);
-                    }, i * 100);
+                } catch (error) {
+                    this.updateDebug(`❌ Network error: ${error.message}`);
                 }
+                
+                // Try to load the model
+                this.updateDebug('🚀 Loading model in viewer...');
+                modelViewer.src = url;
+                
+                this.showMessage(`🧪 Testing ${name}...`);
             }
             
             showMessage(text) {
@@ -533,21 +445,10 @@
             }
         }
         
-        // Add sparkle animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes sparkle {
-                0% { opacity: 1; transform: scale(0) rotate(0deg); }
-                50% { opacity: 1; transform: scale(1.5) rotate(180deg); }
-                100% { opacity: 0; transform: scale(0) rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
-        
         // Start when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('🎉 Starting 3D Bride AR Experience');
-            new BrideAR3D();
+            console.log('🧪 Starting Model Tester');
+            new ModelTester();
         });
     </script>
 </body>
